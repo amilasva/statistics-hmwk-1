@@ -1,0 +1,409 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homework 1 | Public Key Generator</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+
+<header class="hero">
+  <nav class="nav">
+    <span class="brand">HMWK <span>01</span></span>
+  </nav>
+
+  <div class="hero-content">
+    <h1>Public Key<br><span>Generator.</span></h1>
+    <p class="hero-description">
+      Exploring elliptic curve scalar multiplication
+      and the relationship between private and public keys.
+    </p>
+    <a class="primary-button" href="#calculator">
+      Explore the curve ↓
+    </a>
+  </div>
+
+  <div class="hero-equation">
+    <span>ELLIPTIC CURVE</span>
+    <strong>y² ≡ x³ + 7 (mod 17)</strong>
+    <span>G = (1, 5)</span>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- INTRODUCTION -->
+  <section class="section intro-grid">
+    <div>
+      <h2>How does it work?</h2>
+    </div>
+    <div>
+      <p class="section-description">
+        A private key is an integer k. The corresponding
+        public key is calculated as Q = kG, where G is
+        a point on an elliptic curve.
+      </p>
+      <p class="section-description">
+        Scalar multiplication means repeatedly adding
+        the point G to itself. In this example, all
+        calculations are performed modulo 17.
+      </p>
+    </div>
+  </section>
+
+  <!-- PUBLIC KEY GENERATOR -->
+  <section class="panel" id="calculator">
+    <div class="panel-heading">
+      <h2>Private Key → Public Key</h2>
+      <span class="status"><i></i> LIVE CALCULATION</span>
+    </div>
+
+    <div class="controls">
+      <label for="privateKey">Private key k</label>
+      <input id="privateKey" type="number"
+             min="1" max="8" step="1" value="6">
+      <button class="primary-button"
+              id="generateBtn" type="button">
+        Generate public key
+      </button>
+    </div>
+
+    <p class="hint">
+      Enter an integer from 1 to 8.
+      The generator point G has order 9.
+    </p>
+    <p id="errorMessage" class="error"></p>
+
+    <div class="result-grid">
+      <div class="result-card">
+        <span>PRIVATE KEY</span>
+        <strong id="privateResult">k = 6</strong>
+        <small>Selected integer</small>
+      </div>
+
+      <div class="result-card">
+        <span>BASE POINT</span>
+        <strong>G = (1, 5)</strong>
+        <small>Generator point</small>
+      </div>
+
+      <div class="result-card featured">
+        <span>PUBLIC KEY</span>
+        <strong id="publicResult">Q = (5, 8)</strong>
+        <small id="publicNote">Q = 6G</small>
+      </div>
+    </div>
+
+    <h3 class="subheading">Point multiplication steps</h3>
+    <div id="steps" class="steps"></div>
+
+    <p class="note">
+      For two different points, the slope is
+      λ = (y₂ − y₁)(x₂ − x₁)⁻¹ mod 17.
+      For point doubling, λ = 3x₁²(2y₁)⁻¹ mod 17.
+      The resulting coordinates are
+      x₃ = λ² − x₁ − x₂ and
+      y₃ = λ(x₁ − x₃) − y₁, both modulo 17.
+      The exponent −1 represents a modular inverse.
+    </p>
+  </section>
+
+  <!-- ELLIPTIC CURVE MAP -->
+  <section class="section" id="curve">
+    <div class="section-heading">
+      <div>
+        <h2>Elliptic Curve Visualization</h2>
+      </div>
+      <p class="section-description">
+        Every point on the graph satisfies
+        y² ≡ x³ + 7 (mod 17).
+        The highlighted points are multiples of G.
+      </p>
+    </div>
+
+    <div class="panel">
+      <div class="chart-heading">
+        <div>
+          <h3>Curve points over F₁₇</h3>
+          <p>Finite-field coordinates from 0 to 16</p>
+        </div>
+
+        <div class="legend">
+          <span><i class="dot all"></i> Curve points</span>
+          <span><i class="dot subgroup"></i> Multiples of G</span>
+          <span><i class="dot selected"></i> Public key Q</span>
+        </div>
+      </div>
+
+      <div id="curvePlot" class="chart-frame"></div>
+
+      <p class="chart-caption">
+        This is a discrete graph over a finite field,
+        not a continuous curve over real numbers.
+      </p>
+    </div>
+  </section>
+
+  <!-- COORDINATE DISTRIBUTIONS -->
+  <section class="section">
+    <div class="section-heading">
+      <div>
+        <h2>Coordinate Distributions</h2>
+      </div>
+      <p class="section-description">
+        Frequency distributions of the coordinates
+        obtained from G, 2G, ..., 8G.
+      </p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="panel stat-panel">
+        <h3>X-coordinate frequencies</h3>
+        <p>Number of occurrences of each x-value</p>
+        <div id="xChart"
+             class="chart-frame small-chart"></div>
+      </div>
+
+      <div class="panel stat-panel">
+        <h3>Y-coordinate frequencies</h3>
+        <p>Number of occurrences of each y-value</p>
+        <div id="yChart"
+             class="chart-frame small-chart"></div>
+      </div>
+    </div>
+
+    <div class="analysis-text">
+      <p id="frequencyExplanation"></p>
+      <p>
+        Repeated coordinate values do not necessarily
+        represent identical points. Two points may share
+        the same x-coordinate while having different
+        y-coordinates.
+      </p>
+    </div>
+  </section>
+
+  <!-- SCATTER PLOT -->
+  <section class="section">
+    <div class="section-heading">
+      <div>
+        <h2>Coordinate Scatter Plot</h2>
+      </div>
+      <p class="section-description">
+        The relationship between the x and y coordinates
+        of the eight non-identity multiples of G.
+      </p>
+    </div>
+
+    <div class="panel">
+      <div id="scatterPlot" class="chart-frame"></div>
+    </div>
+
+    <div class="analysis-text">
+      <p>
+        Each point represents one multiple of G.
+        Some points are vertically aligned because
+        they share the same x-coordinate. The selected
+        public key is highlighted in orange.
+      </p>
+      <p>
+        The coordinates are produced by modular arithmetic
+        rather than a continuous linear relationship.
+      </p>
+    </div>
+  </section>
+
+  <!-- STATISTICAL SUMMARY -->
+  <section class="section">
+    <div class="section-heading">
+      <div>
+        <h2>Coordinate Summary</h2>
+      </div>
+      <p class="section-description">
+        Descriptive statistics for the coordinates
+        of G through 8G.
+      </p>
+    </div>
+
+    <div class="panel table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Statistic</th>
+            <th>X-coordinate</th>
+            <th>Y-coordinate</th>
+          </tr>
+        </thead>
+        <tbody id="summaryTable"></tbody>
+      </table>
+    </div>
+
+    <div class="analysis-text">
+      <p id="summaryExplanation"></p>
+      <p id="correlationExplanation"></p>
+    </div>
+  </section>
+
+  <!-- STATISTICAL OBSERVATIONS -->
+  <section class="section">
+    <div class="section-heading">
+      <div>
+        <h2>Statistical Observations</h2>
+      </div>
+      <p class="section-description">
+        Observations from different private keys
+        on the curve y² ≡ x³ + 7 (mod 17).
+      </p>
+    </div>
+
+    <div class="panel text-panel">
+      <h3>Coordinate Distribution</h3>
+      <p>
+        The x and y coordinates are not selected randomly.
+        Each public key must satisfy the elliptic curve
+        equation. For example, 3G = (5, 9) and
+        6G = (5, 8) share the same x-coordinate but
+        have different y-coordinates.
+      </p>
+
+      <h3>Repetition and Periodicity</h3>
+      <p>
+        The generator G = (1, 5) has order 9, meaning
+        that 9G is the point at infinity. The sequence
+        then repeats, so 10G = G. This limits the number
+        of distinct points generated by this base point.
+      </p>
+
+      <h3>Changes in the Private Key</h3>
+      <p>
+        Increasing k by 1 produces the next point through
+        elliptic curve addition. However, the numerical
+        differences between consecutive coordinates are
+        not constant. For example, 2G = (2, 10),
+        3G = (5, 9) and 4G = (12, 1).
+      </p>
+
+      <h3>Frequency of Coordinates</h3>
+      <p>
+        In the eight non-identity multiples of G,
+        the x-coordinates occur in pairs. This happens
+        because P and −P have the same x-coordinate
+        but opposite y-coordinates modulo 17.
+        The y-coordinates in this dataset are all distinct.
+      </p>
+
+      <h3>Statistical Dependence</h3>
+      <p>
+        The coordinates are mathematically related
+        through the curve equation, but this does not
+        necessarily imply a strong linear correlation.
+        Mean, standard deviation and correlation
+        describe the numerical dataset without
+        capturing its complete algebraic structure.
+      </p>
+    </div>
+  </section>
+
+  <!-- CRYPTOGRAPHIC PROPERTIES -->
+  <section class="section">
+    <div class="section-heading">
+      <div>
+        <h2>Relationship to Cryptographic Properties</h2>
+      </div>
+    </div>
+
+    <div class="panel text-panel">
+      <p>
+        Elliptic curve scalar multiplication is
+        deterministic: the same private key and
+        generator always produce the same public key.
+      </p>
+
+      <p>
+        The main security principle is the Elliptic
+        Curve Discrete Logarithm Problem (ECDLP).
+        Computing Q = kG is efficient, while recovering
+        k from Q is computationally difficult for
+        appropriately chosen large cryptographic groups.
+      </p>
+
+      <p>
+        Scalar multiplication differs from a
+        cryptographic hash function. Hash functions
+        are designed to provide strong diffusion,
+        whereas elliptic curve multiplication
+        preserves an algebraic relationship:
+      </p>
+
+      <div class="equation-box">
+        (a + b)G = aG + bG
+      </div>
+
+      <p>
+        Consecutive private keys therefore produce
+        mathematically related public keys, even
+        when their coordinates look very different.
+        Unlike a secure hash function, scalar
+        multiplication is not designed to provide
+        the strict avalanche effect.
+      </p>
+
+      <p>
+        In this small example, every possible private
+        key can easily be tested. The purpose is to
+        understand the mathematics, not to implement
+        a secure cryptographic system.
+      </p>
+    </div>
+  </section>
+
+  <!-- POINT TABLE -->
+  <section class="section last-section">
+    <div class="section-heading">
+      <div>
+        <h2>Point Multiplication Table</h2>
+      </div>
+      <p class="section-description">
+        The coordinates produced by successive
+        additions of G.
+      </p>
+    </div>
+
+    <div class="panel table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Multiple</th>
+            <th>x</th>
+            <th>y</th>
+            <th>Point</th>
+            <th>Selected</th>
+          </tr>
+        </thead>
+        <tbody id="multiplesTable"></tbody>
+      </table>
+    </div>
+
+    <p class="note">
+      The next multiple is 9G = O, the point at infinity.
+      It is the identity element and does not have
+      ordinary x and y coordinates.
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  <span>HMWK 01</span>
+  <span>Elliptic Curve Cryptography</span>
+</footer>
+
+</body>
+</html>
+
+
+
+
